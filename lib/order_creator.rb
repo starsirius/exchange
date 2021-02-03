@@ -58,8 +58,9 @@ class OrderCreator
   end
 
   def valid_action?
+    offerable = artwork[:offerable] || artwork[:offerable_from_inquiry]
     action_error = if @mode == Order::BUY && !artwork[:acquireable] then :not_acquireable
-    elsif @mode == Order::OFFER && !artwork[:offerable] then :not_offerable
+    elsif @mode == Order::OFFER && !offerable then :not_offerable
     end
     @errors << action_error if action_error.present?
     action_error.nil?
