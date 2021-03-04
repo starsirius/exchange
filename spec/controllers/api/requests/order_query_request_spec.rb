@@ -75,6 +75,21 @@ describe Api::GraphqlController, type: :request do
             createdAt
             lastTransactionFailed
             displayCommissionRate
+            orderEvents {
+              __typename
+              ... on OfferEvent {
+                createdAt
+                offer {
+                    amountCents
+                    fromParticipant
+                }
+              }
+              ... on OrderEvent {
+                createdAt
+                type
+                stateReason
+              }
+            }
             ... on OfferOrder {
               impulseConversationId
               awaitingResponseFrom
@@ -251,6 +266,13 @@ describe Api::GraphqlController, type: :request do
         expect(result.data.order.display_commission_rate).to eq '10%'
       end
 
+      it 'includes order_events' do
+        result = client.execute(query, id: user1_order1.id)
+        events = result.data.order.order_events
+        expect(events.map(&:__typename)).to eq ['OrderEvent']
+        expect(events.first.type).to eq "PENDING"
+      end
+
       context 'with line items' do
         let!(:order1_line_item1) { Fabricate(:line_item, order: user1_order1, artwork_id: 'artwork1', edition_set_id: 'edi-1') }
         let!(:order1_line_item2) { Fabricate(:line_item, order: user1_order1, artwork_id: 'artwork2', edition_set_id: 'edi-2') }
@@ -296,6 +318,12 @@ describe Api::GraphqlController, type: :request do
 
           it 'includes last_transaction_failed' do
             expect(result.data.order.last_transaction_failed).to eq false
+          end
+          it 'includes order_events' do
+            events = result.data.order.order_events
+            expect(events.map(&:__typename)).to eq ['OrderEvent', 'OfferEvent', 'OfferEvent']
+            expect(events.first.type).to eq "SUBMITTED"
+            expect(events[1,2].map{|event| [event.offer.amount_cents, event.offer.from_participant] }).to eq [[200,"BUYER"],[ 300, "SELLER"]]
           end
         end
 

@@ -21,4 +21,5 @@ class Types::OfferOrderType < Types::BaseObject
 
     object.offers.where(creator_id: context[:current_user][:id]).order(created_at: :desc).first
   end
+
 end

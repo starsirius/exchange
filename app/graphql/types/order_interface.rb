@@ -23,6 +23,7 @@ module Types::OrderInterface
   field :last_transaction_failed, Boolean, null: true, method: :last_transaction_failed?
   field :line_items, Types::LineItemType.connection_type, null: true
   field :mode, Types::OrderModeEnum, null: true
+  field :order_events, [Types::OrderEventUnion], null: false
   field :requested_fulfillment, Types::RequestedFulfillmentUnionType, null: true
   field :seller_total_cents, Integer, null: true, seller_only: true
   field :seller, Types::OrderPartyUnionType, null: false
@@ -42,6 +43,10 @@ module Types::OrderInterface
     offers = object.offers.submitted
     offers = offers.where(args.slice(:from_id, :from_type)) if args.keys.any? { |ar| %i[from_id from_type].include? ar }
     offers
+  end
+
+  def order_events
+    OrderEventService.events_for(order_id: object.id)
   end
 
   def buyer
