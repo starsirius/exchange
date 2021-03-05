@@ -10,7 +10,7 @@ class OrderEventService
   end
 
   def self.offer_events(order)
-    order.offers.submitted.map { |offer| OfferEvent.new(created_at: offer.created_at, offer: offer) }
+    order.offers.submitted.map { |offer| OfferEvent.new(created_at: offer.submitted_at, offer: offer) }
   end
 
   def self.state_events(order)
