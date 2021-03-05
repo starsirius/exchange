@@ -3,26 +3,30 @@ module Types::EventInterface
   field :created_at, Types::DateTimeType, null: false
 end
 
-class Types::OfferEvent < Types::BaseObject
+class Types::OfferSubmittedEvent < Types::BaseObject
   implements Types::EventInterface
-  field :offer, Types::OfferType, null: false
+  field :payload, Types::OfferType, null: false
 end
 
-class Types::OrderEvent < Types::BaseObject
-  implements Types::EventInterface
-  field :type, Types::OrderStateEnum, null: false
+class Types::OrderStateChangePayload < Types::BaseObject
+  field :state: Types::OrderStateEnum, null: false
   field :state_reason, String, null: true
+end
+
+class Types::OrderStateChangedEvent < Types::BaseObject
+  implements Types::EventInterface
+  field :payload, Types::OrderStateChangePayload, null: false
 end
 
 class Types::OrderEventUnion < Types::BaseUnion
   description 'Represents either a state change or new offer'
-  possible_types Types::OfferEvent, Types::OrderEvent
+  possible_types Types::OfferSubmittedEvent, Types::OrderStateChangedEvent
   def self.resolve_type(object, _context)
     case object
-    when OrderEventService::OfferEvent
-      Types::OfferEvent
+    when OrderEventService::OfferSubmitted
+      Types::OfferSubmittedEvent
     else
-      Types::OrderEvent
+      Types::OrderStateChangedEvent
     end
   end
 end

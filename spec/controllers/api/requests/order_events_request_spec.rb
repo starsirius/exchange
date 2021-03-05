@@ -44,18 +44,19 @@ describe Api::GraphqlController, type: :request do
           order(id: $id) {
             orderEvents {
                 __typename
+                createdAt
                 ... on OfferEvent {
-                  createdAt
-                  offer {
+                  payload {
                       amountCents
                       fromParticipant
                   }
                   
                 }
                 ... on OrderEvent {
-                  createdAt
-                  state
-                  reason
+                  payload {
+                    state
+                    reason
+                  }
                 }
               }
           }

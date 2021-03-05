@@ -1,6 +1,6 @@
 class OrderEventService
-  OfferEvent = Struct.new(:created_at, :offer, keyword_init: true)
-  OrderEvent = Struct.new(:created_at, :type, :state_reason, keyword_init: true)
+  OfferSubmitted = Struct.new(:created_at, :payload)
+  OrderStateChanged = Struct.new(:created_at, :payload)
 
   def self.events_for(order_id:)
     order = Order.find(order_id)
@@ -10,12 +10,12 @@ class OrderEventService
   end
 
   def self.offer_events(order)
-    order.offers.submitted.map { |offer| OfferEvent.new(created_at: offer.submitted_at, offer: offer) }
+    order.offers.submitted.map { |offer| OfferSubmitted.new(offer.submitted_at, offer) }
   end
 
   def self.state_events(order)
     order.state_histories.map do |state_history|
-      OrderEvent.new(created_at: state_history.created_at, type: state_history.state, state_reason: state_history.reason)
+      OrderStateChanged.new(state_history.created_at, state: state_history.state, state_reason: state_history.reason)
     end
   end
 
