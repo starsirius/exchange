@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'support/gravity_helper'
 
-describe OrderEventService, type: :services do
+describe OrderHistoryService, type: :services do
     let(:user_id) { 'user-id' }
     let(:partner_id) { 'partner-id' }
     let(:amount_cents) { 200 }
@@ -22,7 +22,7 @@ describe OrderEventService, type: :services do
         context "offer order" do
             shared_examples "order with 2 order events and one offer event" do 
                 it "generates events" do
-                    events = OrderEventService.events_for(order_id: order.id)
+                    events = OrderHistoryService.events_for(order_id: order.id)
                     expect(events.length).to be 3
                     expect(events.map { | event | event.class.name.demodulize }).to eq ['OrderEvent', 'OfferEvent', 'OrderEvent']
                     expect(events[0].type).to eq "pending"
@@ -48,7 +48,7 @@ describe OrderEventService, type: :services do
                     seller_offer.update!(submitted_at: Time.now.utc) # just update submitted_at instead of really accepting the offer which needs a lot of mocking
                 end
                 it "generates events" do
-                    events = OrderEventService.events_for(order_id: order.id)
+                    events = OrderHistoryService.events_for(order_id: order.id)
                     expect(events.length).to be 4
                     expect(events.map { | event | event.class.name.demodulize }).to eq ['OrderEvent', 'OfferEvent', 'OrderEvent', "OfferEvent"]
                     expect(events[3].offer.amount_cents).to eq  20000
@@ -64,7 +64,7 @@ describe OrderEventService, type: :services do
                     order.send(:approve!)
                 end
                 it "generates events" do
-                    events = OrderEventService.events_for(order_id: order.id)
+                    events = OrderHistoryService.events_for(order_id: order.id)
                     expect(events.length).to be 5
                     expect(events.map { | event | event.class.name.demodulize }).to eq ['OrderEvent', 'OfferEvent', 'OrderEvent', "OfferEvent", 'OrderEvent']
                     expect(events[0].type).to eq "pending"

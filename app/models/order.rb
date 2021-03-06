@@ -166,6 +166,10 @@ class Order < ApplicationRecord
   def last_approved_at
     get_last_state_timestamp(Order::APPROVED)
   end
+  
+  def order_history
+    OrderHistoryService.events_for(order_id: id)
+  end
 
   def shipping_address
     return unless fulfillment_type == Order::SHIP

@@ -75,19 +75,19 @@ describe Api::GraphqlController, type: :request do
             createdAt
             lastTransactionFailed
             displayCommissionRate
-            orderEvents {
+            orderHistory {
               __typename
-              ... on OfferEvent {
+              ... on OfferSubmittedEvent {
                 createdAt
                 offer {
-                    amountCents
-                    fromParticipant
+                  amountCents
+                  fromParticipant
                 }
               }
-              ... on OrderEvent {
+              ... on OrderStateChangedEvent {
                 createdAt
-                type
-                stateReason
+                  type
+                  stateReason
               }
             }
             ... on OfferOrder {
