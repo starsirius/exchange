@@ -116,7 +116,7 @@ type BuyOrder implements Order {
     last: Int
   ): LineItemConnection
   mode: OrderModeEnum
-  orderEvents: [OrderEventUnion!]!
+  orderHistory: [OrderEventUnion!]!
   requestedFulfillment: RequestedFulfillmentUnion
   seller: OrderPartyUnion!
   sellerTotalCents: Int
@@ -739,11 +739,6 @@ type OfferEdge {
   node: Offer
 }
 
-type OfferEvent implements EventInterface {
-  createdAt: DateTime!
-  offer: Offer!
-}
-
 type OfferOrder implements Order {
   awaitingResponseFrom: OrderParticipantEnum
   buyer: OrderPartyUnion!
@@ -818,7 +813,7 @@ type OfferOrder implements Order {
     """
     last: Int
   ): OfferConnection
-  orderEvents: [OrderEventUnion!]!
+  orderHistory: [OrderEventUnion!]!
   requestedFulfillment: RequestedFulfillmentUnion
   seller: OrderPartyUnion!
   sellerTotalCents: Int
@@ -831,6 +826,11 @@ type OfferOrder implements Order {
   totalListPriceCents: Int!
   transactionFeeCents: Int
   updatedAt: DateTime!
+}
+
+type OfferSubmittedEvent implements EventInterface {
+  createdAt: DateTime!
+  offer: Offer!
 }
 
 """
@@ -879,7 +879,7 @@ interface Order {
     last: Int
   ): LineItemConnection
   mode: OrderModeEnum
-  orderEvents: [OrderEventUnion!]!
+  orderHistory: [OrderEventUnion!]!
   requestedFulfillment: RequestedFulfillmentUnion
   seller: OrderPartyUnion!
   sellerTotalCents: Int
@@ -974,16 +974,10 @@ type OrderEdge {
   node: Order
 }
 
-type OrderEvent implements EventInterface {
-  createdAt: DateTime!
-  stateReason: String
-  type: OrderStateEnum!
-}
-
 """
 Represents either a state change or new offer
 """
-union OrderEventUnion = OfferEvent | OrderEvent
+union OrderEventUnion = OfferSubmittedEvent | OrderStateChangedEvent
 
 enum OrderFulfillmentTypeEnum {
   """
@@ -1039,6 +1033,12 @@ type OrderRequiresAction {
   Data related to action needed
   """
   actionData: OrderActionData!
+}
+
+type OrderStateChangedEvent implements EventInterface {
+  createdAt: DateTime!
+  stateReason: String
+  type: OrderStateEnum!
 }
 
 enum OrderStateEnum {

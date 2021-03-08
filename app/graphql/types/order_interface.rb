@@ -45,8 +45,6 @@ module Types::OrderInterface
     offers
   end
 
-
-
   def buyer
     OpenStruct.new(
       id: object.buyer_id,

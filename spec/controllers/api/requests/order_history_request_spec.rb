@@ -30,6 +30,7 @@ describe Api::GraphqlController, type: :request do
         impulse_conversation_id: impulse_conversation_id
       )
     end
+    let(:user2_order1) { Fabricate(:order) }
 
     let(:query) do
       <<-GRAPHQL
@@ -54,7 +55,7 @@ describe Api::GraphqlController, type: :request do
         }
       GRAPHQL
     end
-    
+
     before { Timecop.freeze }
     after { Timecop.return }
 
@@ -72,16 +73,15 @@ describe Api::GraphqlController, type: :request do
       end
 
       context 'with offers' do
-
         before do
           Timecop.travel(1.minute)
           user1_order1.submit!
           Timecop.travel(1.minute)
-          user1_order1.offers.create!(amount_cents: 200, from_id: user_id, from_type: Order::USER, submitted_at: Time.now)
+          user1_order1.offers.create!(amount_cents: 200, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
           Timecop.travel(1.minute)
-          user1_order1.offers.create!(amount_cents: 300, from_id: seller_id, from_type: user1_order1.seller_type, submitted_at: Time.now)
+          user1_order1.offers.create!(amount_cents: 300, from_id: seller_id, from_type: user1_order1.seller_type, submitted_at: Time.now.utc)
           Timecop.travel(1.minute)
-          last_offer = user1_order1.offers.create!(amount_cents: 250, from_id: user_id, from_type: Order::USER, submitted_at: Time.now)
+          last_offer = user1_order1.offers.create!(amount_cents: 250, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
           user1_order1.update! last_offer: last_offer
         end
 
@@ -89,26 +89,26 @@ describe Api::GraphqlController, type: :request do
           it 'contains the events' do
             result = client.execute(query, id: user1_order1.id)
             events = result.data.order.order_history
-            expect(events[0].__typename).to eq "OrderStateChangedEvent"
-            expect(events[0].type).to eq "PENDING"
-            
-            expect(events[1].__typename).to eq "OrderStateChangedEvent"
-            expect(events[1].type).to eq "SUBMITTED"
-            
-            expect(events[2].__typename).to eq "OfferSubmittedEvent"
+            expect(events[0].__typename).to eq 'OrderStateChangedEvent'
+            expect(events[0].type).to eq 'PENDING'
+
+            expect(events[1].__typename).to eq 'OrderStateChangedEvent'
+            expect(events[1].type).to eq 'SUBMITTED'
+
+            expect(events[2].__typename).to eq 'OfferSubmittedEvent'
             expect(events[2].offer.amount_cents).to eq 200
-            expect(events[2].offer.from_participant).to eq "BUYER"
-            
-            expect(events[3].__typename).to eq "OfferSubmittedEvent"
+            expect(events[2].offer.from_participant).to eq 'BUYER'
+
+            expect(events[3].__typename).to eq 'OfferSubmittedEvent'
             expect(events[3].offer.amount_cents).to eq 300
-            expect(events[3].offer.from_participant).to eq "SELLER"
-            
-            expect(events[4].__typename).to eq "OfferSubmittedEvent"
+            expect(events[3].offer.from_participant).to eq 'SELLER'
+
+            expect(events[4].__typename).to eq 'OfferSubmittedEvent'
             expect(events[4].offer.amount_cents).to eq 250
-            expect(events[4].offer.from_participant).to eq "BUYER"
+            expect(events[4].offer.from_participant).to eq 'BUYER'
           end
         end
-     end
+      end
     end
   end
 end

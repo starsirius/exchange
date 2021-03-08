@@ -9,13 +9,12 @@ class Types::OfferSubmittedEvent < Types::BaseObject
   field :offer, Types::OfferType, null: false
 end
 
-
 class Types::OrderStateChangedEvent < Types::BaseObject
   # class Payload < Types::BaseObject
   #   field :state, Types::OrderStateEnum, null: false
   #   field :state_reason, String, null: true
   # end
-  
+
   implements Types::EventInterface
   # field :payload, Payload, null: false
   field :type, Types::OrderStateEnum, null: false
