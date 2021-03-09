@@ -47,8 +47,8 @@ describe Api::GraphqlController, type: :request do
               }
               ... on OrderStateChangedEvent {
                 createdAt
-                  type
-                  stateReason
+                type
+                stateReason
               }
             }
           }
@@ -59,8 +59,8 @@ describe Api::GraphqlController, type: :request do
     before { Timecop.freeze }
     after { Timecop.return }
 
-    context 'offer order' do
-      it 'returns not found error when query for orders by user not in jwt' do
+    context 'orders by user not in jwt' do
+      it 'returns not found error when query for ' do
         expect do
           client.execute(query, id: user2_order1.id)
         end.to raise_error do |error|
@@ -71,42 +71,65 @@ describe Api::GraphqlController, type: :request do
           expect(error.response['errors'].first['extensions']['type']).to eq 'validation'
         end
       end
+    end
 
-      context 'with offers' do
-        before do
-          Timecop.travel(1.minute)
-          user1_order1.submit!
-          Timecop.travel(1.minute)
-          user1_order1.offers.create!(amount_cents: 200, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
-          Timecop.travel(1.minute)
-          user1_order1.offers.create!(amount_cents: 300, from_id: seller_id, from_type: user1_order1.seller_type, submitted_at: Time.now.utc)
-          Timecop.travel(1.minute)
-          last_offer = user1_order1.offers.create!(amount_cents: 250, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
-          user1_order1.update! last_offer: last_offer
-        end
+    context 'buy order' do
+      let(:order_mode) { Order::BUY }
+      before do
+        Timecop.travel(1.minute)
+        user1_order1.submit!
+      end
+      it 'contains the events' do
+        result = client.execute(query, id: user1_order1.id)
+        events = result.data.order.order_history
 
-        describe 'the query result' do
-          it 'contains the events' do
-            result = client.execute(query, id: user1_order1.id)
-            events = result.data.order.order_history
-            expect(events[0].__typename).to eq 'OrderStateChangedEvent'
-            expect(events[0].type).to eq 'PENDING'
+        expect(events.length).to be(2)
 
-            expect(events[1].__typename).to eq 'OrderStateChangedEvent'
-            expect(events[1].type).to eq 'SUBMITTED'
+        expect(events[0].__typename).to eq 'OrderStateChangedEvent'
+        expect(events[0].type).to eq 'PENDING'
 
-            expect(events[2].__typename).to eq 'OfferSubmittedEvent'
-            expect(events[2].offer.amount_cents).to eq 200
-            expect(events[2].offer.from_participant).to eq 'BUYER'
+        expect(events[1].__typename).to eq 'OrderStateChangedEvent'
+        expect(events[1].type).to eq 'SUBMITTED'
+      end
+    end
 
-            expect(events[3].__typename).to eq 'OfferSubmittedEvent'
-            expect(events[3].offer.amount_cents).to eq 300
-            expect(events[3].offer.from_participant).to eq 'SELLER'
+    context 'offer order' do
+      before do
+        Timecop.travel(1.minute)
+        user1_order1.submit!
+        Timecop.travel(1.minute)
+        user1_order1.offers.create!(amount_cents: 200, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
+        Timecop.travel(1.minute)
+        user1_order1.offers.create!(amount_cents: 300, from_id: seller_id, from_type: user1_order1.seller_type, submitted_at: Time.now.utc)
+        Timecop.travel(1.minute)
+        last_offer = user1_order1.offers.create!(amount_cents: 250, from_id: user_id, from_type: Order::USER, submitted_at: Time.now.utc)
+        user1_order1.update! last_offer: last_offer
+      end
 
-            expect(events[4].__typename).to eq 'OfferSubmittedEvent'
-            expect(events[4].offer.amount_cents).to eq 250
-            expect(events[4].offer.from_participant).to eq 'BUYER'
-          end
+      describe 'the query result' do
+        it 'contains the events' do
+          result = client.execute(query, id: user1_order1.id)
+          events = result.data.order.order_history
+
+          expect(events.length).to be(5)
+
+          expect(events[0].__typename).to eq 'OrderStateChangedEvent'
+          expect(events[0].type).to eq 'PENDING'
+
+          expect(events[1].__typename).to eq 'OrderStateChangedEvent'
+          expect(events[1].type).to eq 'SUBMITTED'
+
+          expect(events[2].__typename).to eq 'OfferSubmittedEvent'
+          expect(events[2].offer.amount_cents).to eq 200
+          expect(events[2].offer.from_participant).to eq 'BUYER'
+
+          expect(events[3].__typename).to eq 'OfferSubmittedEvent'
+          expect(events[3].offer.amount_cents).to eq 300
+          expect(events[3].offer.from_participant).to eq 'SELLER'
+
+          expect(events[4].__typename).to eq 'OfferSubmittedEvent'
+          expect(events[4].offer.amount_cents).to eq 250
+          expect(events[4].offer.from_participant).to eq 'BUYER'
         end
       end
     end
