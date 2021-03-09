@@ -1,10 +1,6 @@
 class OrderHistoryService
-  OfferSubmitted = Struct.new(:created_at, :offer)
+  OfferSubmitted = Struct.new(:created_at, :offer, keyword_init: true)
   OrderStateChanged = Struct.new(:created_at, :type, :state_reason, keyword_init: true)
-  ## Another possibility
-  # OrderHistoryEvent = Struct.new(:event_name, :created_at, :payload)
-  # usage: OrderHistoryEvent.new("OfferSubmitted", offer.submitted_at, offer)
-  #        OrderHistoryEvent.new("ORDER_#{state_history.state}", state_history.created_at, state_reason: state_history.reason)
 
   def self.events_for(order_id:)
     order = Order.find(order_id)
@@ -14,7 +10,7 @@ class OrderHistoryService
   end
 
   def self.offer_events(order)
-    order.offers.submitted.map { |offer| OfferSubmitted.new(offer.submitted_at, offer) }
+    order.offers.submitted.map { |offer| OfferSubmitted.new(created_at: offer.submitted_at, offer: offer) }
   end
 
   def self.state_events(order)

@@ -75,21 +75,6 @@ describe Api::GraphqlController, type: :request do
             createdAt
             lastTransactionFailed
             displayCommissionRate
-            orderHistory {
-              __typename
-              ... on OfferSubmittedEvent {
-                createdAt
-                offer {
-                  amountCents
-                  fromParticipant
-                }
-              }
-              ... on OrderStateChangedEvent {
-                createdAt
-                  type
-                  stateReason
-              }
-            }
             ... on OfferOrder {
               impulseConversationId
               awaitingResponseFrom
