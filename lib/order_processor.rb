@@ -92,11 +92,11 @@ class OrderProcessor
   end
 
   def deduct_inventory!
-    @inventory_service.deduct_inventory!
+    @inventory_service.deduct_inventory! if @order.require_inventory?
   end
 
   def undeduct_inventory!
-    @inventory_service.undeduct_inventory!
+    @inventory_service.undeduct_inventory! if @order.require_inventory?
   end
 
   def store_transaction(off_session = false)

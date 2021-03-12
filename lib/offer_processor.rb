@@ -14,7 +14,7 @@ class OfferProcessor
   end
 
   def check_inventory!
-    @inventory_service.check_inventory!
+    @inventory_service.check_inventory! if @order.require_inventory?
   end
 
   def validate_order!
