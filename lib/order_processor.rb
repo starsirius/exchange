@@ -7,18 +7,18 @@ class OrderProcessor
     @user_id = user_id
     @validation_error = nil
     @transaction = nil
-    @deducted_inventory = []
     @validated = false
     @totals_set = false
     @state_changed = false
     @original_state_expires_at = nil
     @payment_service = PaymentService.new(@order)
+    @inventory_service = InventoryService.new(@order)
     @exempted_commission = false
   end
 
   def revert!(reversion_reason = nil)
     Rails.logger.warn("Order #{order.id}/#{order.code} reverted. Reason: #{reversion_reason}")
-    undeduct_inventory! if @deducted_inventory.any?
+    undeduct_inventory!
     reset_totals! if @totals_set
     revert_debit_exemption(reversion_reason) if @exempted_commission
     return unless @state_changed
@@ -92,15 +92,11 @@ class OrderProcessor
   end
 
   def deduct_inventory!
-    @order.line_items.each do |item|
-      Gravity.deduct_inventory(item)
-      @deducted_inventory << item
-    end
+    @inventory_service.deduct_inventory!
   end
 
   def undeduct_inventory!
-    @deducted_inventory.each { |li| Gravity.undeduct_inventory(li) }
-    @deducted_inventory = []
+    @inventory_service.undeduct_inventory!
   end
 
   def store_transaction(off_session = false)

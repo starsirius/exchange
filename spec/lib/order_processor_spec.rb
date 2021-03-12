@@ -113,7 +113,9 @@ describe OrderProcessor, type: :services do
       order_processor.revert! revert_reason
     end
     it 'undeducts inventory if there are deducted inventories' do
-      order_processor.instance_variable_set(:@deducted_inventory, [line_item1, line_item2])
+      inventory_service = InventoryService.new(order)
+      inventory_service.instance_variable_set(:@deducted_items, [line_item1, line_item2])
+      order_processor.instance_variable_set(:@inventory_service, inventory_service)
       stub_line_item_1_gravity_undeduct.to_return(status: 200, body: {}.to_json)
       stub_line_item_2_gravity_undeduct.to_return(status: 200, body: {}.to_json)
       order_processor.revert!
@@ -137,7 +139,6 @@ describe OrderProcessor, type: :services do
       )
     end
     it 'it reverts submitted order to pending' do
-      order_processor.instance_variable_set(:@deducted_inventory, [])
       order.submit!
       original_state_expires_at = order.reload.state_expires_at
       order_processor.instance_variable_set(:@state_changed, true)
@@ -255,7 +256,9 @@ describe OrderProcessor, type: :services do
 
   describe 'undedudct_inventory!' do
     before do
-      order_processor.instance_variable_set(:@deducted_inventory, [line_item1, line_item2])
+      inventory_service = InventoryService.new(order)
+      inventory_service.instance_variable_set(:@deducted_items, [line_item1, line_item2])
+      order_processor.instance_variable_set(:@inventory_service, inventory_service)
     end
     it 'calls undeduct for line items' do
       stub_line_item_1_gravity_undeduct.to_return(status: 200, body: {}.to_json)
