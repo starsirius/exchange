@@ -51,10 +51,7 @@ module OrderService
     raise Errors::ValidationError, order_processor.validation_error unless order_processor.valid?
 
     order_processor.advance_state(:submit!)
-    unless order_processor.deduct_inventory
-      order_processor.revert!('insufficient_inventory')
-      raise Errors::InsufficientInventoryError
-    end
+    order_processor.deduct_inventory!
 
     order_processor.set_totals!
     order_processor.hold

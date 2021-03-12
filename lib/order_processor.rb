@@ -91,20 +91,16 @@ class OrderProcessor
     @validation_error.nil?
   end
 
+  def deduct_inventory!
+    @order.line_items.each do |item|
+      Gravity.deduct_inventory(item)
+      @deducted_inventory << item
+    end
+  end
+
   def undeduct_inventory!
     @deducted_inventory.each { |li| Gravity.undeduct_inventory(li) }
     @deducted_inventory = []
-  end
-
-  def deduct_inventory
-    # Try holding artwork and deduct inventory
-    @order.line_items.each do |li|
-      Gravity.deduct_inventory(li)
-      @deducted_inventory << li
-    end
-    true
-  rescue Errors::InsufficientInventoryError
-    false
   end
 
   def store_transaction(off_session = false)

@@ -229,21 +229,25 @@ describe OrderProcessor, type: :services do
     end
   end
 
-  describe 'deduct_inventory' do
+  describe 'deduct_inventory!' do
     before do
       line_item2
     end
-    it 'returns true when fully deducted inventory' do
+    it 'does not raise an exception when fully deducted inventory' do
       stub_line_item_1_gravity_deduct.to_return(status: 200, body: {}.to_json)
       stub_line_item_2_gravity_deduct.to_return(status: 200, body: {}.to_json)
-      expect(order_processor.deduct_inventory).to be true
+      expect do
+        order_processor.deduct_inventory!
+      end.to_not raise_error
       expect(stub_line_item_1_gravity_deduct).to have_been_requested
       expect(stub_line_item_2_gravity_deduct).to have_been_requested
     end
-    it 'returns false on insufficient inventory' do
+    it 'raises an exception on insufficient inventory' do
       stub_line_item_1_gravity_deduct.to_return(status: 200, body: {}.to_json)
       stub_line_item_2_gravity_deduct.to_return(status: 400, body: {}.to_json)
-      expect(order_processor.deduct_inventory).to be false
+      expect do
+        order_processor.deduct_inventory!
+      end.to raise_error(Errors::InsufficientInventoryError)
       expect(stub_line_item_1_gravity_deduct).to have_been_requested
       expect(stub_line_item_2_gravity_deduct).to have_been_requested
     end

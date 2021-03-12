@@ -240,7 +240,7 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
 
     # TODO: feat: capture payment and update transactions
     allow_any_instance_of(OrderProcessor).to receive_messages(
-      deduct_inventory: true,
+      deduct_inventory!: nil,
       debit_commission_exemption: nil,
       charge: nil,
       store_transaction: nil
