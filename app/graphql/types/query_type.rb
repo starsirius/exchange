@@ -16,6 +16,7 @@ class Types::QueryType < Types::BaseObject
     argument :buyer_id, String, required: false
     argument :buyer_type, String, required: false
     argument :state, Types::OrderStateEnum, required: false
+    argument :states, [Types::OrderStateEnum], required: false
     argument :sort, Types::OrderConnectionSortEnum, required: false
     argument :mode, Types::OrderModeEnum, required: false
   end
@@ -49,6 +50,13 @@ class Types::QueryType < Types::BaseObject
 
   def orders(params = {})
     validate_orders_request!(params)
+    states = params.delete(:states)
+    state = params[:state]
+
+    invalid_states_param = Errors::ValidationError.new(:invalid_states_params, message: 'params state and states cannot be passed together.')
+    raise invalid_states_param if state.present? && states.present?
+
+    params = params.merge(state: states) unless states.nil?
     sort = params.delete(:sort)
     order_clause = sort_to_order[sort] || { state_updated_at: :desc }
     Order.where(params).order(order_clause)
