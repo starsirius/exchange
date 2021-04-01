@@ -50,12 +50,10 @@ class Types::QueryType < Types::BaseObject
 
   def orders(params = {})
     validate_orders_request!(params)
-    states = params.delete(:states)
-    state = params[:state]
-
     invalid_states_param = Errors::ValidationError.new(:invalid_states_params, message: 'params state and states cannot be passed together.')
-    raise invalid_states_param if state.present? && states.present?
+    raise invalid_states_param if params.has_key?(:state) && params.has_key?(:states)
 
+    states = params.delete(:states)
     params = params.merge(state: states) unless states.nil?
     sort = params.delete(:sort)
     order_clause = sort_to_order[sort] || { state_updated_at: :desc }
