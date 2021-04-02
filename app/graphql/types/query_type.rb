@@ -15,6 +15,7 @@ class Types::QueryType < Types::BaseObject
     argument :seller_type, String, required: false
     argument :buyer_id, String, required: false
     argument :buyer_type, String, required: false
+    # state will soon be deprecated use states instead
     argument :state, Types::OrderStateEnum, required: false
     argument :states, [Types::OrderStateEnum], required: false
     argument :sort, Types::OrderConnectionSortEnum, required: false
