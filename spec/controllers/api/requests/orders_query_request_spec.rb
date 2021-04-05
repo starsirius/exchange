@@ -356,7 +356,10 @@ describe Api::GraphqlController, type: :request do
 
       it 'returns an error when state and states argument is passed' do
         expect do
+          # rubocop:disable Style/WordArray
           client.execute(both_states_query, state: 'SUBMITTED', states: ['SUBMITTED', 'APPROVED'], sellerId: seller_id)
+
+          # rubocop:enable Style/WordArray
         end.to raise_error do |error|
           expect(error).to be_a(Graphlient::Errors::ServerError)
           expect(error.status_code).to eq 400

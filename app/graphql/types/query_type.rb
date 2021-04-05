@@ -52,7 +52,7 @@ class Types::QueryType < Types::BaseObject
   def orders(params = {})
     validate_orders_request!(params)
     invalid_states_param = Errors::ValidationError.new(:invalid_states_params, message: 'params state and states cannot be passed together.')
-    raise invalid_states_param if params.has_key?(:state) && params.has_key?(:states)
+    raise invalid_states_param if params.key?(:state) && params.key?(:states)
 
     states = params.delete(:states)
     params = params.merge(state: states) unless states.nil?
