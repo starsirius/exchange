@@ -1,5 +1,7 @@
 module TransactionFeeCalculator
   def self.calculate(total_charge_amount, currency)
+    return 0 if ENV['NEW_TRANSACTION_FEE_ENABLED'] == 'true'
+
     0 unless total_charge_amount&.positive?
 
     # This is based on Stripe fee, we decided to charge unified 3.9% + 30 cents across all countries
