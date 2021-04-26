@@ -18,7 +18,7 @@ class Offer < ApplicationRecord
   end
 
   def buyer_total_cents
-    return unless shipping_total_cents.present? && tax_total_cents.present?
+    return unless [amount_cents, shipping_total_cents, tax_total_cents].all?(&:present?)
 
     amount_cents + shipping_total_cents + tax_total_cents
   end

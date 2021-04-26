@@ -16,7 +16,7 @@ class LineItemTotals
     return unless @order.shipping_info? && @line_item.artwork_location.present?
 
     @shipping_total_cents ||= begin
-      per_item_shipping_cents = ShippingHelper.calculate(@line_item.artwork, @order.fulfillment_type, @order.shipping_address)
+      per_item_shipping_cents = ShippingCalculator.new(@line_item.artwork, @order).calculate
       per_item_shipping_cents * @line_item.quantity
     end
   end
@@ -24,7 +24,7 @@ class LineItemTotals
   private
 
   def tax_data
-    return OpenStruct.new(tax_total_cents: nil, should_remit_sales_tax: nil) unless @order.shipping_info?
+    return OpenStruct.new(tax_total_cents: nil, should_remit_sales_tax: nil) unless @order.shipping_info? && @line_item.artwork_location
 
     @tax_data ||= begin
       service = Tax::CalculatorService.new(

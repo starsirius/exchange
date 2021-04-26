@@ -38,7 +38,7 @@ describe LineItemTotals do
       let(:fulfillment_type) { Order::SHIP }
       before do
         order.update!(shipping_name: 'a', shipping_address_line1: 'line1', shipping_city: 'city', shipping_country: 'US', buyer_phone_number: '12312')
-        allow(ShippingHelper).to receive(:calculate).and_return(100)
+        allow_any_instance_of(ShippingCalculator).to receive(:calculate).and_return 100
       end
 
       it 'returns 100' do

@@ -11,23 +11,21 @@ class OfferTotals
   def shipping_total_cents
     return unless @order.shipping_info?
 
-    @shipping_total_cents ||= ShippingHelper.calculate(artwork, @order.fulfillment_type, @order.shipping_address)
+    @shipping_total_cents ||= ShippingCalculator.new(artwork, @order).calculate
   end
 
   private
 
   def artwork
-    @artwork ||= begin
-      @order.line_items.first&.artwork # this is with assumption of Offer order only having one lineItem
-    end
+    @artwork ||= @order.line_items.first&.artwork # this is with assumption of Offer order only having one lineItem
   end
 
   def artwork_location
-    @artwork_location ||= Address.new(artwork[:location])
+    @artwork_location ||= Address.new(artwork[:location]) if artwork[:location]
   end
 
   def tax_data
-    return OpenStruct.new(tax_total_cents: nil, should_remit_sales_tax: nil) unless @order.shipping_info?
+    return OpenStruct.new(tax_total_cents: nil, should_remit_sales_tax: nil) unless @order.shipping_info? && artwork_location
 
     @tax_data ||= begin
       service = Tax::CalculatorService.new(

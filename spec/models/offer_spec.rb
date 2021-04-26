@@ -23,6 +23,36 @@ RSpec.describe Offer, type: :model do
     end
   end
 
+  describe 'buyer_total_cents' do
+    let(:shipping_total_cents) { 20 }
+    let(:amount_cents) { 100 }
+    let(:tax_total_cents) { 5 }
+    let(:order) { Fabricate(:order) }
+    let(:offer) { Fabricate(:offer, order: order, amount_cents: amount_cents, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
+
+    context 'offer with all required amounts' do
+      it 'sums up amount, tax and shipping' do
+        expect(offer.buyer_total_cents).to be 125
+      end
+    end
+
+    context 'offer without tax' do
+      let(:tax_total_cents) { nil }
+
+      it 'returns amount cents as buyer total' do
+        expect(offer.buyer_total_cents).to be nil
+      end
+    end
+
+    context 'offer without shipping' do
+      let(:shipping_total_cents) { nil }
+
+      it 'returns amount cents as buyer total' do
+        expect(offer.buyer_total_cents).to be nil
+      end
+    end
+  end
+
   describe '#scopes' do
     describe 'submitted' do
       let!(:offer1) { Fabricate(:offer, submitted_at: Time.zone.now) }

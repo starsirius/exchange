@@ -40,7 +40,7 @@ class Address
       @region != UNITED_STATES.subregions.coded('AK').code
   end
 
-  def eu_local_shipping?
+  def eu_shipping?
     COUNTRY_CODES_EU_SHIPPING_SET.include? @country
   end
 
