@@ -142,7 +142,8 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
       amount_cents: 500_00,
       shipping_total_cents: nil,
       tax_total_cents: nil,
-      buyer_total_cents: nil
+      buyer_total_cents: nil,
+      has_definite_total?: false
     )
   end
 

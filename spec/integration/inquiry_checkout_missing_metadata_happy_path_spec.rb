@@ -168,7 +168,8 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
       amount_cents: 500_00,
       shipping_total_cents: nil,
       tax_total_cents: nil,
-      buyer_total_cents: nil
+      buyer_total_cents: nil,
+      has_definite_total?: false
     )
   end
 
@@ -191,9 +192,14 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
 
     offer = Offer.last
 
+    result = nil
+
     expect do
-      buyer_client.execute(OfferQueryHelper::SUBMIT_ORDER_WITH_OFFER, input: { offerId: offer.id.to_s })
+      result = buyer_client.execute(OfferQueryHelper::SUBMIT_ORDER_WITH_OFFER, input: { offerId: offer.id.to_s })
     end.to change(order.transactions, :count).by(1)
+
+    # offer doesn't have definite_total because tax/shipping data is not available
+    expect(result.data.submit_order_with_offer.order_or_error.order.last_offer.has_definite_total).to be false
 
     expect(order.transactions.first).to have_attributes(external_id: 'si_1', external_type: Transaction::SETUP_INTENT, status: Transaction::SUCCESS, transaction_type: Transaction::CONFIRM)
 
