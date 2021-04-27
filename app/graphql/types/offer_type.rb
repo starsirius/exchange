@@ -30,7 +30,9 @@ class Types::OfferType < Types::BaseObject
     object.order.currency_code
   end
 
+  # rubocop:disable Naming/PredicateName
   def has_definite_total
-    object.has_definite_total?
+    object.definite_total?
   end
+  # rubocop:enable Naming/PredicateName
 end

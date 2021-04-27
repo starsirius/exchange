@@ -53,7 +53,7 @@ RSpec.describe Offer, type: :model do
     end
   end
 
-  describe '#has_definite_total?' do
+  describe '#definite_total?' do
     let(:shipping_total_cents) { 20 }
     let(:amount_cents) { 100 }
     let(:tax_total_cents) { 5 }
@@ -61,14 +61,14 @@ RSpec.describe Offer, type: :model do
     let(:offer) { Fabricate(:offer, order: order, amount_cents: amount_cents, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
     context 'amount_cents, shipping_total_cents, and  tax_total_cents present' do
       it 'returns true' do
-        expect(offer.has_definite_total?).to be true
+        expect(offer.definite_total?).to be true
       end
     end
     context 'offer without tax' do
       let(:tax_total_cents) { nil }
 
       it 'returns false' do
-        expect(offer.has_definite_total?).to be false
+        expect(offer.definite_total?).to be false
       end
     end
 
@@ -76,7 +76,7 @@ RSpec.describe Offer, type: :model do
       let(:shipping_total_cents) { nil }
 
       it 'returns false' do
-        expect(offer.has_definite_total?).to be false
+        expect(offer.definite_total?).to be false
       end
     end
 
@@ -84,7 +84,7 @@ RSpec.describe Offer, type: :model do
       let(:amount_cents) { nil }
 
       it 'returns false' do
-        expect(offer.has_definite_total?).to be false
+        expect(offer.definite_total?).to be false
       end
     end
   end

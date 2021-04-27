@@ -18,7 +18,7 @@ class Offer < ApplicationRecord
   end
 
   def buyer_total_cents
-    return unless has_definite_total?
+    return unless definite_total?
 
     amount_cents + shipping_total_cents + tax_total_cents
   end
@@ -46,7 +46,7 @@ class Offer < ApplicationRecord
     end
   end
 
-  def has_definite_total?
+  def definite_total?
     [amount_cents, shipping_total_cents, tax_total_cents].all?(&:present?)
   end
 end
