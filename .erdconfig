@@ -1,0 +1,10 @@
+filename: docs/images/erd
+filetype: png
+exclude:
+  - ActiveRecord::InternalMetadata
+  - ActiveRecord::SchemaMigration
+  - PaperTrail::LineItemVersion
+  - PaperTrail::OrderVersion
+  - PaperTrail::TransactionVersion
+  - PaperTrail::OfferVersion
+  - PaperTrail::FulfillmentVersion
