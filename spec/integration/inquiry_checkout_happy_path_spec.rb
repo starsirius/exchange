@@ -209,6 +209,12 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
       commission_fee_cents: 17_00,
       transaction_fee_cents: 19_00
     )
+    allow_any_instance_of(LineItem).to receive_messages(
+      artwork: {
+        domestic_shipping_fee_cents: 200,
+        international_shipping_fee_cents: 300
+      }
+    )
     # `last_offer` is set in `set_order_totals!` that we mocked above. Here we manually update it for now.
     order.update! last_offer: Offer.last
     allow_any_instance_of(OfferProcessor).to receive(:set_order_totals!).and_call_original
