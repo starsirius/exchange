@@ -81,7 +81,7 @@ describe 'Inquiry Checkout not possible because of missing artwork metadata', ty
     prepare_setup_intent_create(status: 'succeeded')
   end
 
-  it 'supports buyer submitting an offer, seller adding missing metadata, and buyer accepting it' do
+  it 'supports buyer submitting an offer, seller not adding missing metadata and seller cannot accept offer' do
     buyer_creates_pending_offer_order
     buyer_adds_initial_offer_to_oder
     buyer_sets_shipping
