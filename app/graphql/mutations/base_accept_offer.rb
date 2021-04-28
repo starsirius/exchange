@@ -10,6 +10,7 @@ class Mutations::BaseAcceptOffer < Mutations::BaseMutation
 
     authorize!(offer)
     raise Errors::ValidationError, :cannot_accept_offer unless waiting_for_accept?(offer)
+    raise Errors::ValidationError, :missing_artwork_location unless artwork_metadata_provided?(offer)
 
     OfferService.accept_offer(offer, current_user_id)
     { order_or_error: { order: offer.order } }
@@ -23,5 +24,12 @@ class Mutations::BaseAcceptOffer < Mutations::BaseMutation
 
   def waiting_for_accept?(_offer)
     raise NotImplementedError
+  end
+
+  def artwork_metadata_provided?(offer)
+    missing_metadata_line_items = offer.order.line_items.select do |line_item|
+      !line_item.artwork[:international_shipping_fee_cents] && !line_item.artwork[:domestic_shipping_fee_cents]
+    end
+    missing_metadata_line_items.empty?
   end
 end
