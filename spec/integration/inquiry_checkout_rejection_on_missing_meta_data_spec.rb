@@ -223,6 +223,6 @@ describe 'Inquiry Checkout not possible because of missing artwork metadata', ty
     response_error = query.data.seller_accept_offer.order_or_error.error
 
     expect(response_error.type).to eq 'validation'
-    expect(response_error.code).to eq 'missing_artwork_location'
+    expect(response_error.code).to eq 'missing_artwork_metadata'
   end
 end
