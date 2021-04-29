@@ -12,11 +12,9 @@ Exchange is responsible for the various types of e-commerce interactions availab
 
 ## Setup
 
-* Fork the project to your GitHub account
-
-* Clone your fork:
+* Clone the project:
   ```
-  $ git clone git@github.com:your-github-username/exchange.git
+  $ git clone git@github.com:artsy/exchange.git
   ```
 
 * Install bundles:
