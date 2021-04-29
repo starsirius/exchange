@@ -216,9 +216,13 @@ describe 'Inquiry Checkout not possible because of missing artwork metadata', ty
   def seller_tries_to_accept_without_providing_metadata
     order = Order.last
     offer = Offer.last
+    query = seller_client.execute(OfferQueryHelper::SELLER_ACCEPT_OFFER, input: { offerId: offer.id.to_s })
 
-    expect do
-      seller_client.execute(OfferQueryHelper::SELLER_ACCEPT_OFFER, input: { offerId: offer.id.to_s })
-    end.not_to change(order.transactions, :count)
+    expect { query }.not_to change(order.transactions, :count)
+
+    response_error = query.data.seller_accept_offer.order_or_error.error
+
+    expect(response_error.type).to eq 'validation'
+    expect(response_error.code).to eq 'missing_artwork_location'
   end
 end
