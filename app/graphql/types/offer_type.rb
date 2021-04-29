@@ -15,6 +15,7 @@ class Types::OfferType < Types::BaseObject
   field :responds_to, Types::OfferType, null: true
   field :from_participant, Types::OrderParticipantEnum, null: true
   field :buyer_total_cents, Integer, null: true
+  field :has_definite_total, Boolean, null: false
   field :note, String, null: true
   field :currency_code, String, null: false
 
@@ -28,4 +29,10 @@ class Types::OfferType < Types::BaseObject
   def currency_code
     object.order.currency_code
   end
+
+  # rubocop:disable Naming/PredicateName
+  def has_definite_total
+    object.definite_total?
+  end
+  # rubocop:enable Naming/PredicateName
 end

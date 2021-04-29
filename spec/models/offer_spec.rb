@@ -39,7 +39,7 @@ RSpec.describe Offer, type: :model do
     context 'offer without tax' do
       let(:tax_total_cents) { nil }
 
-      it 'returns amount cents as buyer total' do
+      it 'returns nil as buyer total' do
         expect(offer.buyer_total_cents).to be nil
       end
     end
@@ -47,8 +47,44 @@ RSpec.describe Offer, type: :model do
     context 'offer without shipping' do
       let(:shipping_total_cents) { nil }
 
-      it 'returns amount cents as buyer total' do
+      it 'returns nil as buyer total' do
         expect(offer.buyer_total_cents).to be nil
+      end
+    end
+  end
+
+  describe '#definite_total?' do
+    let(:shipping_total_cents) { 20 }
+    let(:amount_cents) { 100 }
+    let(:tax_total_cents) { 5 }
+    let(:order) { Fabricate(:order) }
+    let(:offer) { Fabricate(:offer, order: order, amount_cents: amount_cents, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
+    context 'amount_cents, shipping_total_cents, and  tax_total_cents present' do
+      it 'returns true' do
+        expect(offer.definite_total?).to be true
+      end
+    end
+    context 'offer without tax' do
+      let(:tax_total_cents) { nil }
+
+      it 'returns false' do
+        expect(offer.definite_total?).to be false
+      end
+    end
+
+    context 'offer without shipping' do
+      let(:shipping_total_cents) { nil }
+
+      it 'returns false' do
+        expect(offer.definite_total?).to be false
+      end
+    end
+
+    context 'offer without amount' do
+      let(:amount_cents) { nil }
+
+      it 'returns false' do
+        expect(offer.definite_total?).to be false
       end
     end
   end

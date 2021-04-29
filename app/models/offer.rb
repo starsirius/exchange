@@ -18,7 +18,7 @@ class Offer < ApplicationRecord
   end
 
   def buyer_total_cents
-    return unless [amount_cents, shipping_total_cents, tax_total_cents].all?(&:present?)
+    return unless definite_total?
 
     amount_cents + shipping_total_cents + tax_total_cents
   end
@@ -44,5 +44,9 @@ class Offer < ApplicationRecord
     when Order::BUYER then Order::SELLER
     when Order::SELLER then Order::BUYER
     end
+  end
+
+  def definite_total?
+    [amount_cents, shipping_total_cents, tax_total_cents].all?(&:present?)
   end
 end

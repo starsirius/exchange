@@ -172,6 +172,7 @@ module OfferQueryHelper
                   id
                   submittedAt
                   currencyCode
+                  hasDefiniteTotal
                 }
               }
             }
