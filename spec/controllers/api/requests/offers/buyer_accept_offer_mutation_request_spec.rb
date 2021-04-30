@@ -35,7 +35,7 @@ describe Api::GraphqlController, type: :request do
       Fabricate(:line_item, order: order, list_price_cents: 1000_00, artwork_id: 'a-1', artwork_version_id: '1')
     end
     let(:shipping_total_cents) { 100_00 }
-    let(:tax_total_cents) { 100_00 }
+    let(:tax_total_cents) { 300_00 }
     let(:offer) { Fabricate(:offer, order: order, from_id: order_seller_id, from_type: 'gallery', amount_cents: 800_00, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
     let(:artwork) { gravity_v1_artwork(_id: 'a-1', current_version_id: '1') }
 
@@ -237,4 +237,3 @@ describe Api::GraphqlController, type: :request do
     allow(Gravity).to receive(:fetch_partner).and_return(partner)
   end
 end
-

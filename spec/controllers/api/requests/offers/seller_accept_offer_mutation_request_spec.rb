@@ -34,8 +34,8 @@ describe Api::GraphqlController, type: :request do
     let!(:line_item) do
       Fabricate(:line_item, order: order, list_price_cents: 1000_00, artwork_id: 'a-1', artwork_version_id: '1')
     end
-    let(:shipping_total_cents){100_00}
-    let(:tax_total_cents){300_00}
+    let(:shipping_total_cents) { 100_00 }
+    let(:tax_total_cents) { 300_00 }
     let(:offer) do
       Fabricate(
         :offer,
