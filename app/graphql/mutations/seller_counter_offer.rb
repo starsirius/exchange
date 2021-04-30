@@ -26,5 +26,6 @@ class Mutations::SellerCounterOffer < Mutations::BaseMutation
     authorize_seller_request!(offer)
     raise Errors::ValidationError, :invalid_state unless offer.order.state == Order::SUBMITTED
     raise Errors::ValidationError, :cannot_counter unless offer.awaiting_response_from == Order::SELLER
+    raise Errors::ValidationError, :missing_artwork_metadata unless offer.definite_total?
   end
 end

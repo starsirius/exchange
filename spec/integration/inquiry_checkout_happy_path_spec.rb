@@ -197,11 +197,14 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
   def seller_counters_with_missing_data_provided
     order = Order.last
 
+    allow_any_instance_of(Offer).to receive_messages(
+      shipping_total_cents: 30_00,
+      tax_total_cents: 25_00
+    )
+
     # TODO: feat: partner can counter with artwork location and shipping costs provided. The artwork location will need
     # to be updated in Gravity; shipping costs can be updated in Exchange or both.
     allow_any_instance_of(OfferTotals).to receive_messages(
-      shipping_total_cents: 30_00,
-      tax_total_cents: 25_00,
       should_remit_sales_tax: false
     )
     allow_any_instance_of(OfferOrderTotals).to receive_messages(

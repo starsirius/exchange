@@ -34,6 +34,8 @@ describe Api::GraphqlController, type: :request do
     let!(:line_item) do
       Fabricate(:line_item, order: order, list_price_cents: 1000_00, artwork_id: 'a-1', artwork_version_id: '1')
     end
+    let(:shipping_total_cents) { 100_00 }
+    let(:tax_total_cents) { 300_00 }
     let(:offer) do
       Fabricate(
         :offer,
@@ -41,8 +43,8 @@ describe Api::GraphqlController, type: :request do
         from_id: order_buyer_id,
         from_type: 'user',
         amount_cents: 800_00,
-        shipping_total_cents: 100_00,
-        tax_total_cents: 300_00
+        shipping_total_cents: shipping_total_cents,
+        tax_total_cents: tax_total_cents
       )
     end
     let(:artwork) { gravity_v1_artwork(_id: 'a-1', current_version_id: '1') }
@@ -109,6 +111,20 @@ describe Api::GraphqlController, type: :request do
 
         expect(response.data.seller_accept_offer.order_or_error.error.type).to eq 'validation'
         expect(response.data.seller_accept_offer.order_or_error.error.code).to eq 'not_last_offer'
+        expect(order.reload.state).to eq Order::SUBMITTED
+      end
+    end
+
+    context 'when attemting to counter an offer with missing meta data' do
+      let(:shipping_total_cents) { nil }
+      let(:tax_total_cents) { nil }
+      it 'returns missing meta data error' do
+        create_order_and_original_offer
+
+        response = client.execute(mutation, seller_accept_offer_input)
+
+        expect(response.data.seller_accept_offer.order_or_error.error.type).to eq 'validation'
+        expect(response.data.seller_accept_offer.order_or_error.error.code).to eq 'missing_artwork_metadata'
         expect(order.reload.state).to eq Order::SUBMITTED
       end
     end
