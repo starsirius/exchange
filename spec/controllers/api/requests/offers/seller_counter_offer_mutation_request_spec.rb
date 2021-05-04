@@ -11,7 +11,7 @@ describe Api::GraphqlController, type: :request do
     let(:artwork) { gravity_v1_artwork(_id: 'a-1', current_version_id: '1', location: artwork_location, domestic_shipping_fee_cents: 1000) }
     let(:order_state) { Order::SUBMITTED }
     let!(:order) { Fabricate(:order, mode: Order::OFFER, state: order_state, seller_id: order_seller_id, buyer_id: buyer_id, **shipping_info) }
-    let!(:offer) { Fabricate(:offer, order: order, amount_cents: 10000, shipping_total_cents: 30_00, tax_total_cents: 25_00, from_id: buyer_id, from_type: Order::USER, submitted_at: Time.now.utc) }
+    let!(:offer) { Fabricate(:offer, order: order, amount_cents: 10000, from_id: buyer_id, from_type: Order::USER, submitted_at: Time.now.utc) }
     let(:line_item_artwork_version) { artwork[:current_version_id] }
     let!(:line_item) { Fabricate(:line_item, order: order, list_price_cents: 2000_00, artwork_id: artwork[:_id], artwork_version_id: line_item_artwork_version, quantity: 2) }
     let(:partner_address) do
@@ -104,7 +104,6 @@ describe Api::GraphqlController, type: :request do
         response = client.execute(mutation, seller_counter_offer_input)
 
         expect(response.data.seller_counter_offer.order_or_error.error.type).to eq 'validation'
-        # Here
         expect(response.data.seller_counter_offer.order_or_error.error.code).to eq 'not_last_offer'
         expect(order.reload.state).to eq Order::SUBMITTED
       end
