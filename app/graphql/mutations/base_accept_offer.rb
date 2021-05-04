@@ -10,7 +10,7 @@ class Mutations::BaseAcceptOffer < Mutations::BaseMutation
 
     authorize!(offer)
     raise Errors::ValidationError, :cannot_accept_offer unless waiting_for_accept?(offer)
-    raise Errors::ValidationError, :missing_artwork_metadata unless offer.definite_total?
+    raise Errors::ValidationError, :offer_total_not_defined unless offer.definite_total?
 
     OfferService.accept_offer(offer, current_user_id)
     { order_or_error: { order: offer.order } }

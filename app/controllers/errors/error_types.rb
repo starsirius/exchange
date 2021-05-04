@@ -22,7 +22,6 @@ module Errors
       invalid_state
       invalid_states_params
       missing_artwork_location
-      missing_artwork_metadata
       missing_commission_rate
       missing_country
       missing_currency
@@ -44,6 +43,7 @@ module Errors
       not_last_offer
       not_offerable
       offer_not_from_buyer
+      offer_total_not_defined
       order_not_submitted
       uncommittable_action
       unknown_artwork

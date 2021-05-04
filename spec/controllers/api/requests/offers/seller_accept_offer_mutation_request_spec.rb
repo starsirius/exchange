@@ -124,7 +124,7 @@ describe Api::GraphqlController, type: :request do
         response = client.execute(mutation, seller_accept_offer_input)
 
         expect(response.data.seller_accept_offer.order_or_error.error.type).to eq 'validation'
-        expect(response.data.seller_accept_offer.order_or_error.error.code).to eq 'missing_artwork_metadata'
+        expect(response.data.seller_accept_offer.order_or_error.error.code).to eq 'offer_total_not_defined'
         expect(order.reload.state).to eq Order::SUBMITTED
       end
     end
