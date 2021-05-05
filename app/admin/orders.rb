@@ -14,6 +14,7 @@ ActiveAdmin.register Order do
   scope('Completed') { |scope| scope.where(state: Order::FULFILLED) }
   scope('Case Closed') { |scope| scope.by_last_admin_note(AdminNote::TYPES[:case_closed]) }
   scope('Case Still Open') { |scope| scope.by_last_admin_note(AdminNote::TYPES.except(:case_closed).values) }
+  scope('Inquiry Offer', &:is_inquiry_order)
 
   filter :id_eq, label: 'Order Id'
   filter :mode, as: :check_boxes, collection: proc { Order::MODES }, label: 'Type'
