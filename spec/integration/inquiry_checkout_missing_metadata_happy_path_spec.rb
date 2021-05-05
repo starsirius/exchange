@@ -201,7 +201,7 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
     # offer doesn't have definite_total because tax/shipping data is not available
     expect(result.data.submit_order_with_offer.order_or_error.order.last_offer.has_definite_total).to be false
 
-    expect(order.transactions.first).to have_attributes(external_id: 'si_1', external_type: Transaction::SETUP_INTENT, status: Transaction::SUCCESS, transaction_type: Transaction::CONFIRM)
+    expect(order.transactions.min_by(&:created_at)).to have_attributes(external_type: Transaction::SETUP_INTENT, status: Transaction::SUCCESS, transaction_type: Transaction::CONFIRM)
 
     # after submission totals are calculated but shipping and tax are nil because artwork location and shipping is not provided yet
     expect(order.reload).to have_attributes(
@@ -221,10 +221,81 @@ describe 'Inquiry Checkout happy path with missing artwork metadata', type: :req
   end
 
   def seller_provides_missing_metadata_and_accepts
-    # TODO: implementation
+    allow(Gravity).to receive_messages(get_artwork: artwork_with_metadata)
+
+    stub_request(:post, "#{Taxjar::API::Request::DEFAULT_API_URL}/v2/taxes")
+      .with(body: hash_including({ amount: 500 }))
+      .to_return(body: sales_tax_fixture(tax_amount: 25).to_json, headers: { content_type: 'application/json; charset=utf-8' })
+
+    order = Order.last
+    offer = Offer.last
+
+    result = nil
+
+    expect do
+      result = seller_client.execute(OfferQueryHelper::SELLER_ACCEPT_PROVISIONAL_OFFER, input: { offerId: offer.id.to_s })
+    end.not_to change(order.transactions, :count)
+
+    # offer now has definite total
+    expect(result.data.seller_accept_provisional_offer.order_or_error.order.last_offer.has_definite_total).to be true
+
+    order.reload
+
+    expect(order.transactions.count).to be 1
+
+    # after submission totals are calculated with shipping and tax
+    expect(order).to have_attributes(
+      state: Order::SUBMITTED,
+      fulfillment_type: Order::SHIP,
+      shipping_country: 'US',
+      credit_card_id: 'credit_card_1',
+      # calculated with shipping/tax
+      shipping_total_cents: 30_00,
+      tax_total_cents: 25_00,
+      items_total_cents: 500_00,
+      buyer_total_cents: 555_00,
+      seller_total_cents: 483_05,
+      transaction_fee_cents: 21_95,
+      commission_fee_cents: 50_00
+    )
+    expect(order.last_offer).to have_attributes(
+      # amount cents stays the same
+      amount_cents: 50000,
+      shipping_total_cents: 30_00,
+      tax_total_cents: 25_00,
+      # amount change is false and fees added is true
+      offer_amount_changed?: false,
+      defines_total?: true
+    )
+
+    # TODO: check pulse events
   end
 
   def buyer_accepts_offer
-    # TODO: implementation
+    order = Order.last
+
+    seller_counter_offer = order.offers.order(created_at: :desc).first
+    buyer_accept_offer_input = { offerId: seller_counter_offer.id.to_s }
+    buyer_client.execute(OfferQueryHelper::BUYER_ACCEPT_OFFER, input: buyer_accept_offer_input)
+
+    expect(order.reload).to have_attributes(
+      state: Order::APPROVED,
+      fulfillment_type: Order::SHIP,
+      items_total_cents: 500_00,
+      shipping_total_cents: 30_00,
+      tax_total_cents: 25_00,
+      buyer_total_cents: 555_00,
+      commission_fee_cents: 50_00,
+      transaction_fee_cents: 21_95,
+      seller_total_cents: 483_05,
+      shipping_country: 'US',
+      credit_card_id: 'credit_card_1'
+    )
+
+    deduct_inventory_request = stub_request(:put, "#{gravity_v1_api_root}/artwork/#{artwork_id}/inventory")
+    expect(deduct_inventory_request).to_not have_been_made
+
+    expect(order.transactions.count).to be 2
+    expect(order.transactions.max_by(&:created_at)).to have_attributes(external_type: Transaction::PAYMENT_INTENT, status: Transaction::SUCCESS, transaction_type: Transaction::CAPTURE)
   end
 end

@@ -89,6 +89,68 @@ RSpec.describe Offer, type: :model do
     end
   end
 
+  describe '#offer_amount_changed?' do
+    let(:order) { Fabricate(:order) }
+    let(:amount_cents) { 100 }
+    let(:previous_offer) { Fabricate(:offer, order: order, amount_cents: amount_cents) }
+    let(:offer) { Fabricate(:offer, order: order, responds_to: previous_offer, amount_cents: amount_cents) }
+
+    context 'when not responding to a previous offer' do
+      let(:previous_offer) { nil }
+      it 'returns false' do
+        expect(offer.offer_amount_changed?).to be(false)
+      end
+    end
+    context 'when amounts are the same' do
+      it 'returns false' do
+        expect(offer.offer_amount_changed?).to be(false)
+      end
+    end
+
+    context 'when previous offer has a different amount' do
+      let(:previous_offer) { Fabricate(:offer, order: order, amount_cents: 200) }
+      it 'returns false' do
+        expect(offer.offer_amount_changed?).to be(true)
+      end
+    end
+  end
+
+  describe '#defines_total?' do
+    let(:order) { Fabricate(:order) }
+    let(:shipping_total_cents) { 20 }
+    let(:amount_cents) { 100 }
+    let(:tax_total_cents) { 5 }
+    let(:previous_offer) { Fabricate(:offer, order: order, amount_cents: amount_cents) }
+    let(:offer) { Fabricate(:offer, order: order, responds_to: previous_offer, amount_cents: amount_cents, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
+
+    context 'when not responding to a previous offer' do
+      let(:previous_offer) { nil }
+      it 'returns false' do
+        expect(offer.defines_total?).to be(false)
+      end
+    end
+
+    context 'when previous offer has definite total' do
+      let(:previous_offer) { Fabricate(:offer, order: order, amount_cents: amount_cents, shipping_total_cents: shipping_total_cents, tax_total_cents: tax_total_cents) }
+      it 'returns false' do
+        expect(offer.defines_total?).to be(false)
+      end
+    end
+
+    context 'when new offer does not have definite total' do
+      let(:offer) { Fabricate(:offer, order: order, responds_to: previous_offer, amount_cents: amount_cents, shipping_total_cents: nil, tax_total_cents: nil) }
+      it 'returns false' do
+        expect(offer.defines_total?).to be(false)
+      end
+    end
+
+    context 'when previous offer does not have definite total and this one has' do
+      it 'returns true' do
+        expect(offer.defines_total?).to be(true)
+      end
+    end
+  end
+
   describe '#scopes' do
     describe 'submitted' do
       let!(:offer1) { Fabricate(:offer, submitted_at: Time.zone.now) }

@@ -19,6 +19,7 @@ class Types::MutationType < Types::BaseObject
   field :seller_accept_offer, mutation: Mutations::SellerAcceptOffer
   field :seller_reject_offer, mutation: Mutations::SellerRejectOffer
   field :seller_counter_offer, mutation: Mutations::SellerCounterOffer
+  field :seller_accept_provisional_offer, mutation: Mutations::SellerAcceptProvisionalOffer
   field :reject_order, mutation: Mutations::RejectOrder
   field :fulfill_at_once, mutation: Mutations::FulfillAtOnce
   field :confirm_pickup, mutation: Mutations::ConfirmPickup

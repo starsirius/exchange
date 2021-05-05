@@ -15,7 +15,9 @@ class Types::OfferType < Types::BaseObject
   field :responds_to, Types::OfferType, null: true
   field :from_participant, Types::OrderParticipantEnum, null: true
   field :buyer_total_cents, Integer, null: true
-  field :has_definite_total, Boolean, null: false
+  field :has_definite_total, Boolean, null: false, description: 'True when a all the fees (shipping/tax) were calculated for the offer'
+  field :offer_amount_changed, Boolean, null: false, description: 'Only false when previous offer has the same amount.'
+  field :defines_total, Boolean, null: false, description: 'True when this offer fills in the missing fees from the previous one'
   field :note, String, null: true
   field :currency_code, String, null: false
 
@@ -35,4 +37,12 @@ class Types::OfferType < Types::BaseObject
     object.definite_total?
   end
   # rubocop:enable Naming/PredicateName
+
+  def offer_amount_changed
+    object.offer_amount_changed?
+  end
+
+  def defines_total
+    object.defines_total?
+  end
 end

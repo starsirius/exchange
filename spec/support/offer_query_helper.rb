@@ -159,6 +159,56 @@ module OfferQueryHelper
     }
   ).freeze
 
+  SELLER_ACCEPT_PROVISIONAL_OFFER = %(
+    mutation($input: SellerAcceptProvisionalOfferInput!) {
+      sellerAcceptProvisionalOffer(input: $input) {
+        orderOrError {
+          ... on OrderWithMutationSuccess {
+            order {
+              id
+              state
+              orderHistory {
+                __typename
+                ... on OfferSubmittedEvent {
+                  createdAt
+                  offer {
+                    amountCents
+                    fromParticipant
+                    taxTotalCents
+                    shippingTotalCents
+                    hasDefiniteTotal
+                    offerAmountChanged
+                    definesTotal
+                  }
+                }
+                ... on OrderStateChangedEvent {
+                  createdAt
+                  state
+                  stateReason
+                }
+              }
+              ... on OfferOrder {
+                lastOffer {
+                  id
+                  submittedAt
+                  currencyCode
+                  hasDefiniteTotal
+                }
+              }
+            }
+          }
+          ... on OrderWithMutationFailure {
+            error {
+              code
+              data
+              type
+            }
+          }
+        }
+      }
+    }
+  ).freeze
+
   SUBMIT_ORDER_WITH_OFFER = %(
     mutation($input: SubmitOrderWithOfferInput!) {
       submitOrderWithOffer(input: $input) {

@@ -49,4 +49,16 @@ class Offer < ApplicationRecord
   def definite_total?
     [amount_cents, shipping_total_cents, tax_total_cents].all?(&:present?)
   end
+
+  def offer_amount_changed?
+    return false if responds_to.blank?
+
+    amount_cents != responds_to.amount_cents
+  end
+
+  def defines_total?
+    return false if responds_to.blank?
+
+    definite_total? && !responds_to.definite_total?
+  end
 end
