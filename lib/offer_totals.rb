@@ -29,14 +29,14 @@ class OfferTotals
 
     @tax_data ||= begin
       service = Tax::CalculatorService.new(
-        @offer_amount,
-        @offer_amount / @order.line_items.first.quantity,
-        @order.line_items.first.quantity,
-        @order.fulfillment_type,
-        @order.shipping_address,
-        shipping_total_cents,
-        artwork_location,
-        @order.nexus_addresses
+        total_amount_cents: @offer_amount,
+        unit_price_cents: @offer_amount / @order.line_items.first.quantity,
+        quantity: @order.line_items.first.quantity,
+        fulfillment_type: @order.fulfillment_type,
+        shipping_address: @order.shipping_address,
+        shipping_total_cents: shipping_total_cents,
+        artwork_location: artwork_location,
+        nexus_addresses: @order.nexus_addresses
       )
       sales_tax = @order.partner[:artsy_collects_sales_tax] ? service.sales_tax : 0
       OpenStruct.new(tax_total_cents: sales_tax, should_remit_sales_tax: service.artsy_should_remit_taxes?)

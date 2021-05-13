@@ -28,14 +28,14 @@ class LineItemTotals
 
     @tax_data ||= begin
       service = Tax::CalculatorService.new(
-        @line_item.total_list_price_cents,
-        @line_item.total_list_price_cents / @line_item.quantity,
-        @line_item.quantity,
-        @fulfillment_type,
-        @shipping_address,
-        shipping_total_cents,
-        @line_item.artwork_location,
-        @nexus_addresses
+        total_amount_cents: @line_item.total_list_price_cents,
+        quantity: @line_item.quantity,
+        unit_price_cents: @line_item.total_list_price_cents / @line_item.quantity,
+        fulfillment_type: @fulfillment_type,
+        shipping_address: @shipping_address,
+        shipping_total_cents: shipping_total_cents,
+        artwork_location: @line_item.artwork_location,
+        nexus_addresses: @nexus_addresses
       )
       sales_tax = @artsy_collects_sales_tax ? service.sales_tax : 0
       OpenStruct.new(tax_total_cents: sales_tax, should_remit_sales_tax: service.artsy_should_remit_taxes?)

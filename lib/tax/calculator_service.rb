@@ -1,15 +1,15 @@
 class Tax::CalculatorService
   REMITTING_STATES = [].freeze
   def initialize(
-    total_amount_cents,
-    quantity,
-    unit_price_cents,
-    fulfillment_type,
-    shipping_address,
-    shipping_total_cents,
-    artwork_location,
-    nexus_addresses,
-    tax_client = Taxjar::Client.new(
+    total_amount_cents:,
+    quantity:,
+    unit_price_cents:,
+    fulfillment_type:,
+    shipping_address:,
+    shipping_total_cents:,
+    artwork_location:,
+    nexus_addresses:,
+    tax_client: Taxjar::Client.new(
       api_key: Rails.application.config_for(:taxjar)['taxjar_api_key'],
       api_url: Rails.application.config_for(:taxjar)['taxjar_api_url'].presence
     )

@@ -68,8 +68,26 @@ describe Tax::CalculatorService, type: :services do
       Tax::CalculatorService.const_set('REMITTING_STATES', ['fl'])
     end
     allow(Taxjar::Client).to receive(:new).with(api_key: Rails.application.config_for(:taxjar)['taxjar_api_key'], api_url: nil).and_return(taxjar_client)
-    @service_ship = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, shipping_address, shipping_total_cents, artwork_location, seller_addresses)
-    @service_pickup = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::PICKUP, Address.new({}), shipping_total_cents, artwork_location, seller_addresses)
+    @service_ship = Tax::CalculatorService.new(
+      total_amount_cents: line_item_total_cents,
+      quantity: line_item_quantity,
+      unit_price_cents: line_item_unit_price,
+      fulfillment_type: Order::SHIP,
+      shipping_address: shipping_address,
+      shipping_total_cents: shipping_total_cents,
+      artwork_location: artwork_location,
+      nexus_addresses: seller_addresses
+    )
+    @service_pickup = Tax::CalculatorService.new(
+      total_amount_cents: line_item_total_cents,
+      quantity: line_item_quantity,
+      unit_price_cents: line_item_unit_price,
+      fulfillment_type: Order::PICKUP,
+      shipping_address: Address.new({}),
+      shipping_total_cents: shipping_total_cents,
+      artwork_location: artwork_location,
+      nexus_addresses: seller_addresses
+    )
   end
 
   after do
@@ -81,7 +99,16 @@ describe Tax::CalculatorService, type: :services do
   describe '#initialize' do
     context 'with a destination address in a remitting state' do
       it 'sets seller_nexus_addresses to only be taxable seller addresses' do
-        service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, Address.new(shipping), shipping_total_cents, artwork_location, seller_addresses + [untaxable_address])
+        service = Tax::CalculatorService.new(
+          total_amount_cents: line_item_total_cents,
+          quantity: line_item_quantity,
+          unit_price_cents: line_item_unit_price,
+          fulfillment_type: Order::SHIP,
+          shipping_address: Address.new(shipping),
+          shipping_total_cents: shipping_total_cents,
+          artwork_location: artwork_location,
+          nexus_addresses: seller_addresses + [untaxable_address]
+        )
         expect(service.instance_variable_get(:@seller_nexus_addresses)).to eq seller_addresses
       end
     end
@@ -115,7 +142,16 @@ describe Tax::CalculatorService, type: :services do
         context 'with missing region' do
           it 'raises a missing_region error' do
             shipping[:region] = nil
-            service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, Address.new(shipping), shipping_total_cents, artwork_location, seller_addresses)
+            service = Tax::CalculatorService.new(
+              total_amount_cents: line_item_total_cents,
+              quantity: line_item_quantity,
+              unit_price_cents: line_item_unit_price,
+              fulfillment_type: Order::SHIP,
+              shipping_address: Address.new(shipping),
+              shipping_total_cents: shipping_total_cents,
+              artwork_location: artwork_location,
+              nexus_addresses: seller_addresses
+            )
             expect { service.send(:destination_address) }.to raise_error do |error|
               expect(error).to be_a Errors::ValidationError
               expect(error.type).to eq :validation
@@ -126,7 +162,16 @@ describe Tax::CalculatorService, type: :services do
         context 'with missing postal code' do
           it 'raises a missing_postal_code error' do
             shipping[:postal_code] = nil
-            service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, Address.new(shipping), shipping_total_cents, artwork_location, seller_addresses)
+            service = Tax::CalculatorService.new(
+              total_amount_cents: line_item_total_cents,
+              quantity: line_item_quantity,
+              unit_price_cents: line_item_unit_price,
+              fulfillment_type: Order::SHIP,
+              shipping_address: Address.new(shipping),
+              shipping_total_cents: shipping_total_cents,
+              artwork_location: artwork_location,
+              nexus_addresses: seller_addresses
+            )
             expect { service.send(:destination_address) }.to raise_error do |error|
               expect(error).to be_a Errors::ValidationError
               expect(error.type).to eq :validation
@@ -146,7 +191,16 @@ describe Tax::CalculatorService, type: :services do
         context 'with missing region' do
           it 'raises an invalid_artwork_address error' do
             invalid_artwork_location = Address.new(country: 'US', postal_code: '10013')
-            service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::PICKUP, Address.new(shipping), shipping_total_cents, invalid_artwork_location, seller_addresses)
+            service = Tax::CalculatorService.new(
+              total_amount_cents: line_item_total_cents,
+              quantity: line_item_quantity,
+              unit_price_cents: line_item_unit_price,
+              fulfillment_type: Order::PICKUP,
+              shipping_address: Address.new(shipping),
+              shipping_total_cents: shipping_total_cents,
+              artwork_location: invalid_artwork_location,
+              nexus_addresses: seller_addresses
+            )
             expect { service.send(:destination_address) }.to raise_error do |error|
               expect(error).to be_a Errors::ValidationError
               expect(error.type).to eq :validation
@@ -157,7 +211,16 @@ describe Tax::CalculatorService, type: :services do
         context 'with missing postal code' do
           it 'raises an invalid_artwork_address error' do
             invalid_artwork_location = Address.new(country: 'US', region: 'NY')
-            service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::PICKUP, Address.new(shipping), shipping_total_cents, invalid_artwork_location, seller_addresses)
+            service = Tax::CalculatorService.new(
+              total_amount_cents: line_item_total_cents,
+              quantity: line_item_quantity,
+              unit_price_cents: line_item_unit_price,
+              fulfillment_type: Order::PICKUP,
+              shipping_address: Address.new(shipping),
+              shipping_total_cents: shipping_total_cents,
+              artwork_location: invalid_artwork_location,
+              nexus_addresses: seller_addresses
+            )
             expect { service.send(:destination_address) }.to raise_error do |error|
               expect(error).to be_a Errors::ValidationError
               expect(error.type).to eq :validation
@@ -193,7 +256,16 @@ describe Tax::CalculatorService, type: :services do
         it 'returns true' do
           Tax::CalculatorService::REMITTING_STATES.each do |state|
             shipping[:region] = state
-            service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, Address.new(shipping), shipping_total_cents, artwork_location, seller_addresses)
+            service = Tax::CalculatorService.new(
+              total_amount_cents: line_item_total_cents,
+              quantity: line_item_quantity,
+              unit_price_cents: line_item_unit_price,
+              fulfillment_type: Order::SHIP,
+              shipping_address: Address.new(shipping),
+              shipping_total_cents: shipping_total_cents,
+              artwork_location: artwork_location,
+              nexus_addresses: seller_addresses
+            )
             expect(service.send(:artsy_should_remit_taxes?)).to be true
           end
         end
@@ -207,7 +279,16 @@ describe Tax::CalculatorService, type: :services do
     context 'with an order that has a non-US destination address' do
       it 'returns false' do
         shipping[:country] = 'FR'
-        service = Tax::CalculatorService.new(line_item_total_cents, line_item_quantity, line_item_unit_price, Order::SHIP, Address.new(shipping), shipping_total_cents, artwork_location, seller_addresses)
+        service = Tax::CalculatorService.new(
+          total_amount_cents: line_item_total_cents,
+          quantity: line_item_quantity,
+          unit_price_cents: line_item_unit_price,
+          fulfillment_type: Order::SHIP,
+          shipping_address: Address.new(shipping),
+          shipping_total_cents: shipping_total_cents,
+          artwork_location: artwork_location,
+          nexus_addresses: seller_addresses
+        )
         expect(service.send(:artsy_should_remit_taxes?)).to be false
       end
     end
