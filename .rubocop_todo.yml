@@ -24,6 +24,7 @@ Naming/VariableNumber:
   Exclude:
     - 'lib/address.rb'
     - 'spec/models/order_spec.rb'
+    - 'lib/arta/quote.rb'
 
 # Offense count: 69
 # Cop supports --auto-correct.

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_01_15_162614) do
+ActiveRecord::Schema.define(version: 2021_04_20_175055) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -195,6 +195,31 @@ ActiveRecord::Schema.define(version: 2021_01_15_162614) do
     t.index ["state"], name: "index_orders_on_state"
   end
 
+  create_table "shipping_quote_requests", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "line_item_id"
+    t.string "external_id", null: false
+    t.jsonb "response_payload"
+    t.string "internal_reference"
+    t.string "public_reference"
+    t.string "quoted_at"
+    t.string "expires_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["line_item_id"], name: "index_shipping_quote_requests_on_line_item_id"
+  end
+
+  create_table "shipping_quotes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "shipping_quote_request_id", null: false
+    t.string "tier", null: false
+    t.string "name"
+    t.integer "external_id", null: false
+    t.bigint "price_cents", null: false
+    t.string "price_currency", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["shipping_quote_request_id"], name: "index_shipping_quotes_on_shipping_quote_request_id"
+  end
+
   create_table "state_histories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "order_id"
     t.datetime "created_at", null: false
@@ -241,6 +266,8 @@ ActiveRecord::Schema.define(version: 2021_01_15_162614) do
   add_foreign_key "offers", "offers", column: "responds_to_id"
   add_foreign_key "offers", "orders"
   add_foreign_key "orders", "offers", column: "last_offer_id"
+  add_foreign_key "shipping_quote_requests", "line_items"
+  add_foreign_key "shipping_quotes", "shipping_quote_requests"
   add_foreign_key "state_histories", "orders"
   add_foreign_key "transactions", "orders"
 end

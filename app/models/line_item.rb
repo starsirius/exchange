@@ -7,6 +7,9 @@ class LineItem < ApplicationRecord
   has_many :line_item_fulfillments, dependent: :destroy
   has_many :fulfillments, through: :line_item_fulfillments
 
+  has_many :shipping_quote_requests, dependent: :destroy
+  has_many :shipping_quotes, through: :shipping_quote_requests
+
   validate :offer_order_lacks_line_items, on: :create
 
   validates :artwork_version_id, presence: true
