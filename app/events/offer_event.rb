@@ -25,6 +25,8 @@ class OfferEvent < Events::BaseEvent
     {
       id: @object.id,
       amount_cents: @object.amount_cents,
+      amount_changed: @object.offer_amount_changed?,
+      defines_total: @object.defines_total?,
       submitted_at: @object.submitted_at,
       from_participant: @object.from_participant,
       last_offer: @object.last_offer?,

@@ -102,6 +102,14 @@ describe OfferEvent, type: :events do
       expect(in_response_to[:id]).to eq old_offer.id
       expect(in_response_to[:amount_cents]).to eq 240
     end
+    it 'includes amount_changed' do
+      expect(offer).to receive(:offer_amount_changed?).and_return true
+      expect(event.properties[:amount_changed]).to be true
+    end
+    it 'includes defines_total' do
+      expect(offer).to receive(:defines_total?).and_return true
+      expect(event.properties[:defines_total]).to be true
+    end
     describe '#order' do
       context 'without last_offer' do
         it 'returns correct properties for a submitted order' do

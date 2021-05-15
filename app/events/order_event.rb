@@ -25,7 +25,8 @@ class OrderEvent < Events::BaseEvent
     shipping_name
     shipping_postal_code
     shipping_region
-    shipping_total_cents state
+    shipping_total_cents
+    state
     state_expires_at
     state_reason
     tax_total_cents
